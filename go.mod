@@ -1,3 +1,5 @@
+module github.com/kigongo-vincent/hotspot-be
+
 go 1.26.4
 
 require (
