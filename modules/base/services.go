@@ -46,6 +46,11 @@ func FilteredPagination(r *APIRequest) func(db *gorm.DB) *gorm.DB {
 	return Paginate(&r.Pagination)
 }
 
+// in base/ or config/
+func GoogleClientID() string {
+	return os.Getenv("GOOGLE_CLIENT_ID")
+}
+
 // Paginate provides the reusable GORM Scope logic for calculating offset bounds.
 func Paginate(p *PaginationControls) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
