@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -56,7 +57,8 @@ func SetupApplication() *fiber.App {
 
 	app := fiber.New()
 	// app.Use(limiter.New(limiter.Config{Max: 100, Expiration: 60 * time.Second}))
-	app.Use(cors.New())
+	// app.Use(cors.New())
+	app.Use(corsMiddleware())
 	return app
 }
 
@@ -96,4 +98,22 @@ func ConnectDB() *gorm.DB {
 
 	return db
 
+}
+
+func corsMiddleware() fiber.Handler {
+	raw := os.Getenv("ALLOWED_ORIGINS")
+	var origins []string
+	for _, o := range strings.Split(raw, ",") {
+		o = strings.TrimSpace(o)
+		if o != "" {
+			origins = append(origins, o)
+		}
+	}
+
+	return cors.New(cors.Config{
+		AllowOrigins:     strings.Join(origins, ","),
+		AllowMethods:     "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+		AllowHeaders:     "Origin, Content-Type, Authorization",
+		AllowCredentials: true,
+	})
 }
