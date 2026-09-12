@@ -33,9 +33,6 @@ RUN mkdir -p /app/uploads
 # Copy binary
 COPY --from=builder /app/main .
 
-# Copy frontend
-COPY --from=builder /app/public ./public
-
 EXPOSE 3000
 
 CMD ["./main"]
