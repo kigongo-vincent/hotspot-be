@@ -22,10 +22,10 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3000" // fallback for local dev
+		port = "3000" // fallback for local dev1
 	}
 	err := app.Listen(":" + port)
 	if err != nil {
-		log.Fatal("failed to start server, check root file")
+		log.Fatal("failed to start server, check root file" + err.Error())
 	}
 }

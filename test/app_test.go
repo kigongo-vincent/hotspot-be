@@ -19,7 +19,7 @@ import (
 
 var TestApp *fiber.App
 var URL = "/api/v1"
-var BEARER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODkxMDU2MTIsImlkIjoxMywicm9sZSI6ImRlZmF1bHQifQ.FjEq41EmvNoJy_q9TZEDiJqaaW3fsUzOwH2zXos5rVI"
+var BEARER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODg1OTcwMTgsInJvbGUiOiJkZWZhdWx0IiwidWlkIjoxfQ.9iKxJh3cQKLF6FZsII7hC0wfYlaQcTOzCa2T5K4KiGo"
 
 func BASE_URL(v string) string {
 	return fmt.Sprintf("%s/%s", URL, v)
@@ -42,9 +42,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestHealth(t *testing.T) {
-	// t.Skip()
-	// HTTP[any, any](HTTPRequest[any, any]{Method: fiber.MethodGet, Path: "health"})
-	// t.Error()
+	t.Skip()
+	HTTP[any, any](HTTPRequest[any, any]{Method: fiber.MethodGet, Path: "health"})
+	t.Error()
 }
 
 func ParseBody[T any](r *http.Response) (base.APIResponseT[T], error, []byte) {

@@ -12,7 +12,13 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kigongo-vincent/hotspot-be/modules/auth"
 	"github.com/kigongo-vincent/hotspot-be/modules/base"
+	disbursements "github.com/kigongo-vincent/hotspot-be/modules/disbursement"
+	"github.com/kigongo-vincent/hotspot-be/modules/packages"
+	"github.com/kigongo-vincent/hotspot-be/modules/router"
 	"github.com/kigongo-vincent/hotspot-be/modules/shared"
+	"github.com/kigongo-vincent/hotspot-be/modules/transactions"
+	"github.com/kigongo-vincent/hotspot-be/modules/users"
+	"github.com/kigongo-vincent/hotspot-be/modules/vouchers"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -31,6 +37,13 @@ func RegisterAppRoutes(dependecies Dependencies) {
 
 	register := base.RouteRegister{DB: dependecies.DB, Router: v1}
 	auth.RouterRegister(&register)
+	router.RouterRegister(&register)
+	packages.RouterRegister(&register)
+	users.RouterRegister(&register)
+	vouchers.RouterRegister(&register)
+	transactions.RouterRegister(&register)
+	disbursements.RouterRegister(&register)
+
 }
 
 func SetupApplication() *fiber.App {
@@ -67,7 +80,14 @@ func ConnectDB() *gorm.DB {
 	})
 	db.AutoMigrate(
 		&shared.User{},
-		&shared.Business{},
+		&router.Router{},
+		&router.VPN{},
+		&router.RouterStat{},
+		&packages.Package{},
+		&shared.Company{},
+		&vouchers.Voucher{},
+		&transactions.Transaction{},
+		&disbursements.Disbursement{},
 	)
 	if err != nil {
 		log.Fatal("failed to start application due to db connection failure")

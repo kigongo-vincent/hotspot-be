@@ -1,4 +1,4 @@
-package vouchers
+package packages
 
 import (
 	"github.com/kigongo-vincent/hotspot-be/modules/base"
@@ -7,16 +7,13 @@ import (
 
 func RouterRegister(r *base.RouteRegister) {
 	s := NewService(r.DB)
-	g := r.Router.Group("vouchers", middleware.VerifyJWT())
+	g := r.Router.Group("packages", middleware.VerifyJWT())
 
 	g.Get("/", s.FindAll)
-	g.Post("/list", s.ListVouchers)
-	g.Get("/stats", s.GetVoucherStats)
-	g.Get("/batches", s.GetVoucherBatches)
-	g.Get("/batches/:note", s.GetVoucherBatch)
 	g.Get("/:id", s.FindByID)
 	g.Post("/", s.Create)
 	g.Put("/:id", s.Update)
+	g.Put("/:id/active", s.ToggleActive)
 	g.Post("/bulk-delete", s.DeleteMany)
 	g.Delete("/:id", s.Delete)
 }

@@ -1,24 +1,9 @@
 package shared
 
 import (
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
-
-type Business struct {
-	gorm.Model
-	OwnerID  *uint  `json:"ownerId"`
-	Owner    *User  `json:"owner" gorm:"foreignKey:OwnerID"`
-	Name     string `json:"name"`
-	Location string `json:"location"`
-}
-
-type Branch struct {
-	gorm.Model
-	BusinessID *uint     `json:"businessId"`
-	Business   *Business `json:"business" gorm:"foreignKey:BusinessID"`
-	Name       string    `json:"name"`
-	Members    []User    `json:"members" gorm:"many2many:branch_members"`
-}
 
 type User struct {
 	gorm.Model
@@ -30,7 +15,25 @@ type User struct {
 	IsActive bool     `json:"isActive" gorm:"default:false"`
 	Password string   `json:"password"`
 	GoogleID string   `json:"googleId"`
-	Branch   Branch   `json:"branch" gorm:"-"`
+}
+
+type Currency string
+
+const (
+	UGX Currency = "UGX"
+)
+
+type Balance struct {
+	Value    int      `json:"value"`
+	Currency Currency `json:"currency"`
+}
+
+type Company struct {
+	gorm.Model
+	UserID  *uint                       `json:"userId"`
+	User    User                        `json:"user" gorm:"foreignKey:UserID"`
+	Members []User                      `json:"members" gorm:"many2many:company_members"`
+	Balance datatypes.JSONType[Balance] `json:"balance"`
 }
 
 type UserRole string

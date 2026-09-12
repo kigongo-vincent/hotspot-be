@@ -75,7 +75,7 @@ func VerifyJWT() fiber.Handler {
 		// get the user role and user id
 		role, ok := claims["role"]
 		if !ok {
-			return c.Status(401).JSON(base.APIResponse{Message: "authentication failed"})
+			return c.Status(403).JSON(base.APIResponse{Message: "authentication failed"})
 		}
 		id, ok := claims["uid"]
 		if !ok {

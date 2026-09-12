@@ -50,11 +50,19 @@ func (s *AuthService) SignUp(c *fiber.Ctx) error {
 		Phone:    body.Phone,
 		Password: string(hashed),
 	}
+
+	// save user
 	if err := s.DB.Create(&user).Error; err != nil {
 		return base.API_ERROR(c, "failed to create account")
 	}
 
-	token, tErr := generateToken(user.ID)
+	// save company
+	tmpCompany := shared.Company{UserID: &user.ID}
+	if cErr := s.DB.Create(&tmpCompany).Error; cErr != nil {
+		return base.API_ERROR(c, "failed to create a company for the user")
+	}
+
+	token, tErr := GenerateToken(user.ID, user.Role)
 	if tErr != nil {
 		return base.API_ERROR(c, "failed to generate token")
 	}
@@ -89,7 +97,7 @@ func (s *AuthService) Login(c *fiber.Ctx) error {
 		return base.API_ERROR(c, "invalid email or password")
 	}
 
-	token, tErr := generateToken(user.ID)
+	token, tErr := GenerateToken(user.ID, user.Role)
 	if tErr != nil {
 		return base.API_ERROR(c, "failed to generate token")
 	}
@@ -189,6 +197,13 @@ func (s *AuthService) GoogleAuth(c *fiber.Ctx) error {
 		if cErr := s.DB.Create(&user).Error; cErr != nil {
 			return base.API_ERROR(c, "failed to create account")
 		}
+
+		// save company
+		tmpCompany := shared.Company{UserID: &user.ID}
+		if coErr := s.DB.Create(&tmpCompany).Error; coErr != nil {
+			return base.API_ERROR(c, "failed to create a company for the user")
+		}
+
 	} else if user.GoogleID == "" {
 		// Existing email/password account signing in with Google for the
 		// first time — link the two rather than creating a duplicate row.
@@ -198,7 +213,7 @@ func (s *AuthService) GoogleAuth(c *fiber.Ctx) error {
 		}
 	}
 
-	token, tErr := generateToken(user.ID)
+	token, tErr := GenerateToken(user.ID, user.Role)
 	if tErr != nil {
 		return base.API_ERROR(c, "failed to generate token")
 	}
@@ -213,12 +228,13 @@ func (s *AuthService) GoogleAuth(c *fiber.Ctx) error {
 	}})
 }
 
-// generateToken signs a JWT carrying the user's ID, matching the shape
+// GenerateToken signs a JWT carrying the user's ID, matching the shape
 // base.GetUserIDFromCtx expects to find in c.Locals("id").
-func generateToken(userID uint) (string, error) {
+func GenerateToken(userID uint, role shared.UserRole) (string, error) {
 	claims := jwt.MapClaims{
-		"id":  userID,
-		"exp": time.Now().Add(time.Hour * 24 * 7).Unix(),
+		"uid":  userID,
+		"role": role,
+		"exp":  time.Now().Add(time.Hour * 24 * 7).Unix(),
 	}
 	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return tok.SignedString([]byte(base.JWTSecret()))

@@ -1,0 +1,69 @@
+name: CI/CD [GitHub -> Docker Hub -> EC2]
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. Create local .env file for build stage if needed
+      - name: Create local .env file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+
+      # 2. Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.PROJECT_NAME }}:latest .
+
+      # 3. Login to Docker Hub
+      - name: Docker Hub login
+        run: |
+          echo "${{ secrets.DOCKER_PAT }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # 4. Push image to Docker Hub
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.PROJECT_NAME }}:latest
+
+      # 5. Deploy to EC2
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          port: 22
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Login to Docker Hub on EC2
+            echo "${{ secrets.DOCKER_PAT }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+            # Pull latest image
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.PROJECT_NAME }}:latest
+
+            # Recreate .env on EC2 using the proven benchmark pattern
+            echo "${{ secrets.ENV_FILE }}" > /home/ec2-user/.env
+
+            # Clean out any old container instances or naming collisions forcefully
+            docker rm -f ${{ secrets.PROJECT_NAME }} jolly_varahamihira mystifying_lehmann || true
+
+            # Run container with .env mapping (Using host port 3000 to resolve Nginx 502)
+            docker run -d \
+              --name ${{ secrets.PROJECT_NAME }} \
+              --restart unless-stopped \
+              --env-file /home/ec2-user/.env \
+              -p 3001:3000 \
+              ${{ secrets.DOCKER_USERNAME }}/${{ secrets.PROJECT_NAME }}:latest
+
+            # Securely purge plaintext credentials from the host filesystem
+            rm -f /home/ec2-user/.env
+
+            # Cleanup old dangling image layers
+            docker image prune -af || true

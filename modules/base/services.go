@@ -25,10 +25,10 @@ func SetupApplication() *fiber.App {
 
 func GetUserIDFromCtx(c *fiber.Ctx) (uint, error) {
 	// If stored as a uint directly in your JWT middleware:
-	userId, ok := c.Locals("id").(uint)
+	userId, ok := c.Locals("uid").(uint)
 	if !ok {
 		// Or fallback if your token parser saves it as a float64/int
-		if val, ok := c.Locals("id").(float64); ok {
+		if val, ok := c.Locals("uid").(float64); ok {
 			return uint(val), nil
 		}
 		return 0, errors.New("unauthorized: missing or invalid user token context")
