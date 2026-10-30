@@ -1,12 +1,12 @@
 services:
   database:
     image: postgres:15
-    container_name: hotpsotv2
+    container_name: hotpsotv3
 
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=hotspotv3
 
     ports:
       - "5432:5432"

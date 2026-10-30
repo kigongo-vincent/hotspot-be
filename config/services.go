@@ -132,7 +132,7 @@ func corsMiddleware() fiber.Handler {
 	return cors.New(cors.Config{
 		AllowOrigins:     strings.Join(origins, ","),
 		AllowMethods:     "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-		AllowHeaders:     "Origin, Content-Type, Authorization",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization, ngrok-skip-browser-warning",
 		AllowCredentials: true,
 	})
 }
